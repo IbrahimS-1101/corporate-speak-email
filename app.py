@@ -1,0 +1,97 @@
+import streamlit as st
+import google.generativeai as genai
+import os
+
+# --- 1. SETUP ---
+st.set_page_config(page_title="Corporate Translator", page_icon="👔")
+
+st.title("👔 Translate Your Email to Corporate Speak!")
+st.markdown("Turn your rough thoughts into professional business emails.")
+
+# Secure API Key Handling
+api_key = None
+try:
+    if "GEMINI_API_KEY" in st.secrets:
+        api_key = st.secrets["GEMINI_API_KEY"]
+    elif os.getenv("GEMINI_API_KEY"):
+        api_key = os.getenv("GEMINI_API_KEY")
+except:
+    pass
+
+# Sidebar Config
+with st.sidebar:
+    st.header("⚙️ Settings")
+    if api_key:
+        st.success("✅ System Connected")
+    else:
+        # Fallback for local testing
+        api_key = st.text_input("API Key", type="password")
+
+    st.markdown("---")
+    # THE VALUE ADD: Tone Selection
+    tone = st.selectbox(
+        "Select Tone:",
+        ["Standard Professional", "Firm & Assertive", "Apologetic & Polite", "Executive Summary"]
+    )
+    
+    length = st.radio("Length:", ["Concise", "Detailed"])
+
+# --- 2. THE LOGIC ---
+def polish_email(draft, tone, length, api_key):
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.5-flash-lite')
+        
+        prompt = f"""
+        You are a corporate communications expert. 
+        Rewrite the following draft text into professional business English.
+        
+        Draft: "{draft}"
+        
+        Target Tone: {tone}
+        Target Length: {length}
+        
+        RULES:
+        1. Fix all grammar and spelling errors.
+        2. Remove slang or aggressive language.
+        3. Make it sound native and polished.
+        4. Do not add filler content that wasn't in the original idea.
+        """
+        
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+# --- 3. THE UI ---
+# Split layout: Input on left, Output on right (Desktop view)
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("### 📥 Your Draft")
+    draft_text = st.text_area(
+        "Type your rough ideas here...", 
+        height=300, 
+        placeholder="e.g., I need the report by Friday or else we are going to miss the deadline."
+    )
+    
+    generate_btn = st.button("✨ Polish My Email", type="primary", use_container_width=True)
+
+with col2:
+    st.markdown("### 📤 Professional Result")
+    
+    if generate_btn and draft_text and api_key:
+        with st.spinner("Translating to 'Corporate Speak'..."):
+            result = polish_email(draft_text, tone, length, api_key)
+            st.text_area("Copy this:", value=result, height=300)
+    elif generate_btn and not api_key:
+        st.error("Please provide an API Key.")
+    elif generate_btn and not draft_text:
+        st.warning("Please enter some text first.")
+    else:
+        st.info("Result will appear here.")
+
+# Footer
+st.markdown("---")
+st.caption("Privacy Note: Your drafts are processed by AI and not stored.")
+st.markdown("Made with a lot of ☕ by Ibrahim Samir")
