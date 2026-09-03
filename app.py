@@ -61,7 +61,7 @@ def polish_email(draft, tone, length, api_key):
         response, model_name = generate_content_with_fallback(client, prompt, api_key)
         return get_response_text(response), model_name
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {str(e)}", None
 
 # --- 3. THE UI ---
 # Split layout: Input on left, Output on right (Desktop view)
@@ -83,8 +83,11 @@ with col2:
     if generate_btn and draft_text and api_key:
         with st.spinner("Translating to 'Corporate Speak'..."):
             result, model_name = polish_email(draft_text, tone, length, api_key)
-            st.text_area("Copy this:", value=result, height=300)
-            st.caption(f"Model used: {model_name}")
+            if model_name:
+                st.text_area("Copy this:", value=result, height=300)
+                st.caption(f"Model used: {model_name}")
+            else:
+                st.error(result)
     elif generate_btn and not api_key:
         st.error("Please provide an API Key.")
     elif generate_btn and not draft_text:
