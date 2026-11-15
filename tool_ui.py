@@ -1,4 +1,24 @@
+from html import escape
+
 import streamlit as st
+
+
+def arabic_intro(description):
+    st.html(f"""
+        <style>
+        .tool-intro-ar {{
+            border-inline-start: 2px solid color-mix(in srgb, currentColor 24%, transparent);
+            border-radius: 6px;
+            background: color-mix(in srgb, currentColor 4%, transparent);
+            padding: 0.55rem 0.8rem;
+            margin-top: 0.15rem;
+            font-size: 0.96rem;
+            line-height: 1.8;
+            text-align: start;
+        }}
+        </style>
+        <div class="tool-intro-ar" lang="ar" dir="rtl">{escape(description)}</div>
+    """)
 
 
 def support_footer():
