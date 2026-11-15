@@ -1,6 +1,6 @@
 import streamlit as st
 
-from tool_ui import support_footer
+from tool_ui import arabic_intro, support_footer
 from google.genai import types
 from gemini_model import create_gemini_client, generate_content_with_fallback, get_response_text
 import os
@@ -10,6 +10,7 @@ st.set_page_config(page_title="Corporate Translator", page_icon="👔")
 
 st.title("👔 Translate Your Email to Corporate Speak!")
 st.markdown("Turn your rough thoughts into professional business emails.")
+arabic_intro("أعد صياغة مسودة بريدك بالإنجليزية واختر النبرة والطول المناسبين للرسالة.")
 
 # Secure API Key Handling
 api_key = None
